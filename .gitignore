@@ -1,0 +1,14 @@
+node_modules
+.next
+.data
+.env
+.env.local
+coverage
+playwright-report
+test-results
+*.tsbuildinfo
+next-env.d.ts
+# local tooling and personal media (the background track is not redistributable)
+.claude
+public/assets/audio/*.mp3
+*.log
