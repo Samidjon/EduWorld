@@ -94,6 +94,14 @@ describe("recommendations", () => {
     expect(recs[0].topicId).toBe("math.equal-groups");
   });
 
+  it("does not recommend topics the diagnostic already placed as known", () => {
+    const placed = (topic: string): LearningProgressRow => ({ ...emptyProgress("c1", topic), status: "learning", mastery_level: 0.75, placed_by_assessment: true });
+    const known = ["early.numbers", "early.counting", "early.compare-quantities", "math.addition-20", "math.subtraction-20", "math.compare-numbers"].map(placed);
+    const recs = recommend({ topics: TOPICS, progress: known, grade: 3 });
+    for (const k of known) expect(recs.map((r) => r.topicId)).not.toContain(k.topic_id);
+    expect(recs.length).toBeGreaterThan(0);
+  });
+
   it("respects parent subject restrictions", () => {
     const recs = recommend({ topics: TOPICS, progress: [], grade: 2, allowedSubjects: ["science"] });
     expect(recs.every((r) => TOPIC_MAP.get(r.topicId)!.subject === "science")).toBe(true);

@@ -166,6 +166,8 @@ export function recommend(opts: {
     if (!allowed(t)) continue;
     const p = pmap.get(t.id);
     if (p?.status === "mastered" || p?.status === "needs_review") continue;
+    // already known from the diagnostic: don't put it ahead of genuinely new topics
+    if (p?.placed_by_assessment && isUnderstood(p)) continue;
     if (!prerequisitesMet(t, pmap)) continue;
     const [lo, hi] = t.grades;
     const g = opts.grade;
@@ -175,7 +177,7 @@ export function recommend(opts: {
     else if (hi < g) priority = 55; // a gap below the child's grade - fill it
     else if (lo === g + 1) { priority = 30; reason = "stretch"; }
     if (priority === null) continue;
-    if (p?.status === "learning") priority += 8; // continue what was started
+    if (p?.status === "learning") priority += isUnderstood(p) ? -15 : 8; // continue what was started; nearly-known topics go later
     add(t.id, hi < g ? "foundation" : reason, priority + pref(t) - Math.max(0, lo - g));
   }
 
