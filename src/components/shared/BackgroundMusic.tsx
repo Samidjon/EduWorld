@@ -18,6 +18,8 @@ const POS_KEY = "ew_music_pos";
 export function BackgroundMusic() {
   const audio = useRef<HTMLAudioElement | null>(null);
   const [muted, setMutedState] = useState(false);
+  // the track is not in git, so deployments may not have it - then there is no music button at all
+  const [available, setAvailable] = useState(false);
   const path = usePathname();
 
   useEffect(() => {
@@ -30,11 +32,15 @@ export function BackgroundMusic() {
       if (pos > 0) a.currentTime = pos;
     } catch { /* storage unavailable */ }
     audio.current = a;
+    const onReady = () => setAvailable(true);
+    const onMissing = () => setAvailable(false);
+    a.addEventListener("canplay", onReady);
+    a.addEventListener("error", onMissing);
     const m = isMuted();
     setMutedState(m);
 
     const tryPlay = () => {
-      if (isMuted()) return;
+      if (isMuted() || a.error) return;
       a.play().then(removeUnlock).catch(() => { /* waiting for a user gesture */ });
     };
     const removeUnlock = () => ["pointerdown", "keydown", "touchstart"].forEach((e) => window.removeEventListener(e, tryPlay));
@@ -54,6 +60,8 @@ export function BackgroundMusic() {
 
     return () => {
       removeUnlock();
+      a.removeEventListener("canplay", onReady);
+      a.removeEventListener("error", onMissing);
       window.removeEventListener("ew-mute", onMute);
       clearInterval(save);
       a.pause();
@@ -61,13 +69,13 @@ export function BackgroundMusic() {
   }, []);
 
   // the child area has its own sound switch in the top bar
-  if (path.startsWith("/play")) return null;
+  if (!available || path.startsWith("/play")) return null;
   return (
     <button
       onClick={() => setMuted(!muted)}
       aria-label={muted ? "Включить музыку" : "Выключить музыку"}
       title={muted ? "Включить музыку" : "Выключить музыку"}
-      className="fixed bottom-4 right-4 z-40 grid size-12 place-items-center rounded-full bg-night-800/85 text-white shadow-lg ring-1 ring-white/15 backdrop-blur transition hover:scale-105"
+      className="fixed bottom-4 left-4 z-40 grid size-11 place-items-center rounded-full bg-night-800/85 text-white shadow-lg ring-1 ring-white/15 backdrop-blur transition hover:scale-105"
     >
       {muted ? <VolumeX className="size-5" aria-hidden /> : <Music className="size-5" aria-hidden />}
     </button>

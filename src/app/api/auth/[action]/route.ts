@@ -11,7 +11,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ action:
     const ip = clientIp(req);
     if (action === "register") {
       rateLimit(`register:${ip}`, 5, 60 * 60_000);
-      const body = registerSchema.parse(await req.json());
+      const body = registerSchema.parse(await req.json().catch(() => ({})));
       const res = await signUp(body.email, body.password, new URL(req.url).origin);
       // Supabase's built-in mailer allows only a few confirmation emails per hour
       if (!res.ok && res.message === "email_rate_limit") return NextResponse.json({ error: "rate_limited" }, { status: 429 });
@@ -20,7 +20,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ action:
     }
     if (action === "login") {
       rateLimit(`login:${ip}`, 10, 10 * 60_000);
-      const body = loginSchema.parse(await req.json());
+      const body = loginSchema.parse(await req.json().catch(() => ({})));
       rateLimit(`login:${body.email}`, 8, 10 * 60_000);
       const res = await signIn(body.email, body.password);
       if (!res.ok) return NextResponse.json({ error: res.error }, { status: 401 });
