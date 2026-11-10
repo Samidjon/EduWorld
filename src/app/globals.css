@@ -20,8 +20,8 @@
   --color-glass: rgb(255 255 255 / 0.08);
 
   /* Fredoka has no Cyrillic: the browser falls back per glyph to Nunito (bold, rounded) */
-  --font-display: var(--font-fredoka), var(--font-nunito), ui-rounded, system-ui, sans-serif;
-  --font-sans: var(--font-nunito), ui-rounded, system-ui, sans-serif;
+  --font-display: "Fredoka", "Nunito Variable", ui-rounded, system-ui, sans-serif;
+  --font-sans: "Nunito Variable", ui-rounded, system-ui, sans-serif;
 
   --radius-4xl: 2rem;
   --radius-5xl: 2.5rem;
