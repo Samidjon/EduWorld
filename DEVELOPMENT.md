@@ -44,3 +44,15 @@ Implement `MiniGameProps` (`src/components/minigames/types.ts`) in `components/m
 
 ## Deploy (Vercel + Supabase Cloud)
 Set env vars from `.env.example` in Vercel (never the service-role key). `next build` must pass. Choose the Supabase region according to the data-residency rules of your target countries (see SECURITY.md).
+
+## Android APK
+The APK is a thin Capacitor wrapper that opens the deployed site (the app is server-rendered, so it needs the site online).
+1. Deploy the site (e.g. Vercel) and note its URL.
+2. Tools: JDK 21 + Android SDK (platform 35, build-tools 35). Set `JAVA_HOME`, and `android/local.properties` → `sdk.dir=...`.
+3. Build:
+   ```bash
+   EDUWORLD_APP_URL=https://your-site.vercel.app npx cap sync android
+   cd android && ./gradlew assembleDebug        # → app/build/outputs/apk/debug/app-debug.apk
+   ```
+4. Icons: `node scripts/make-android-icons.mjs` (renders Foxy into `android/app/src/main/res/mipmap-*`).
+The offline fallback page is `android-shell/index.html`.
